@@ -77,8 +77,8 @@ reviewSchema.statics.calculateAverageRating = async function (destinationId) {
 };
 
 // Call calculateAverageRating after save
-reviewSchema.post('save', function () {
-  this.constructor.calculateAverageRating(this.destination);
+reviewSchema.post('save', async function () {
+  await this.constructor.calculateAverageRating(this.destination);
 });
 
 // Call calculateAverageRating after delete
