@@ -1,0 +1,67 @@
+name: QA checks
+
+on:
+  push:
+    branches: [oshadi-qa]
+  pull_request:
+    branches: [develop]
+
+permissions:
+  contents: read
+
+jobs:
+  api-tests:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: Server
+
+    services:
+      mongo:
+        image: mongo:7
+        ports:
+          - 27017:27017
+        options: >-
+          --health-cmd "mongosh --quiet --eval 'db.adminCommand({ping: 1})'"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 12
+
+    env:
+      MONGO_URI: mongodb://127.0.0.1:27017/ceylontrip_qa
+      JWT_SECRET: local-ci-only-c​eylontrip-qa-test-key
+      PORT: "5000"
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Seed QA database
+        run: node seed/seeder.js
+
+      - name: Start backend and run Newman
+        run: |
+          node server.js > server.log 2>&1 &
+          server_pid=$!
+          trap 'kill "$server_pid" 2>/dev/null || true' EXIT
+
+          for attempt in {1..30}; do
+            if curl --silent --output /dev/null http://127.0.0.1:5000/; then
+              npm run test:api
+              exit $?
+            fi
+
+            if ! kill -0 "$server_pid" 2>/dev/null; then
+              break
+            fi
+            sleep 1
+          done
+
+          cat server.log
+          exit 1
