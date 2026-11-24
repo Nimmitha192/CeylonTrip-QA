@@ -17,3 +17,4 @@ assertions, 116 passed and 6 failed.
 
 The workflow and CI run evidence are pending. The full workflow depends
 on the Jest and Cucumber BDD setup being merged into develop.
+GitHub Actions ran the Newman API tests for commit 991c069. Dependencies installed and the QA database seed step completed. The Newman step failed and exited with code 1. The CI log showed a JSON parsing failure in TC-DST-03a, an unexpected HTTP 500 in TC-CAT-01c, and a review count mismatch in TC-REV-05.
