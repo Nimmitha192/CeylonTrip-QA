@@ -1,9 +1,17 @@
+const MIN_TRIP_DAYS = 1;
+const MAX_TRIP_DAYS = 30;
+
+const isValidDuration = (duration) => {
+  const days = Number(duration);
+  return Number.isInteger(days) && days >= MIN_TRIP_DAYS && days <= MAX_TRIP_DAYS;
+};
+
 const validateTripGenerate = (req, res, next) => {
   const { duration, startingLocation } = req.body;
   const errors = [];
 
-  if (!duration || duration < 1 || duration > 30) {
-    errors.push('Trip duration must be between 1 and 30 days');
+  if (!isValidDuration(duration)) {
+    errors.push(`Trip duration must be between ${MIN_TRIP_DAYS} and ${MAX_TRIP_DAYS} days`);
   }
 
   if (!startingLocation || !startingLocation.name) {
@@ -21,4 +29,4 @@ const validateTripGenerate = (req, res, next) => {
   next();
 };
 
-module.exports = { validateTripGenerate };
+module.exports = { validateTripGenerate, isValidDuration };
