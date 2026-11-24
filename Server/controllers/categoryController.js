@@ -28,6 +28,12 @@ const createCategory = async (req, res, next) => {
       data: category,
     });
   } catch (err) {
+    if (err.code === 11000) {
+      return res.status(400).json({
+        success: false,
+        message: 'A category with that name or slug already exists',
+      });
+    }
     next(err);
   }
 };
