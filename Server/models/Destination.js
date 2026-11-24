@@ -141,14 +141,13 @@ const destinationSchema = new mongoose.Schema(
 );
 
 // Slug auto-generation
-destinationSchema.pre('save', function (next) {
+destinationSchema.pre('save', function () {
   if (this.isModified('name')) {
     this.slug = this.name
       .toLowerCase()
       .replace(/[^a-z0-9]+/g, '-')
       .replace(/(^-|-$)+/g, '');
   }
-  next();
 });
 
 // Indexes for high performance searches & filters
