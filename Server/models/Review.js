@@ -81,6 +81,11 @@ reviewSchema.post('save', async function () {
   await this.constructor.calculateAverageRating(this.destination);
 });
 
+// Recalculate when a review is deleted through its document.
+reviewSchema.post('deleteOne', { document: true, query: false }, async function () {
+  await this.constructor.calculateAverageRating(this.destination);
+});
+
 // Call calculateAverageRating after delete
 reviewSchema.post('findOneAndDelete', async function (doc) {
   if (doc) {

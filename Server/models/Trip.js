@@ -47,6 +47,7 @@ const tripSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User',
       required: true,
+      immutable: true,
     },
     title: {
       type: String,
