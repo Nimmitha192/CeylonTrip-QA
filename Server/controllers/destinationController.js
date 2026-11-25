@@ -23,11 +23,22 @@ const getDestinations = async (req, res, next) => {
     const query = {};
 
     // Keyword text search (name, tags, description)
+    if (search !== undefined &&
+        (typeof search !== 'string' || search.length > 200)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid search input',
+      });
+    }
+
     if (search && search.trim() !== '') {
+      const safeSearch = search.trim()
+        .replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
       query.$or = [
-        { name: { $regex: search.trim(), $options: 'i' } },
-        { description: { $regex: search.trim(), $options: 'i' } },
-        { tags: { $in: [new RegExp(search.trim(), 'i')] } },
+        { name: { $regex: safeSearch, $options: 'i' } },
+        { description: { $regex: safeSearch, $options: 'i' } },
+        { tags: { $in: [new RegExp(safeSearch, 'i')] } },
       ];
     }
 

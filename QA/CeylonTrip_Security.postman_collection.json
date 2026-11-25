@@ -1,0 +1,169 @@
+﻿{
+    "info":  {
+                 "name":  "CeylonTrip Security Testing",
+                 "schema":  "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+             },
+    "variable":  [
+                     {
+                         "key":  "baseUrl",
+                         "value":  "http://localhost:5000"
+                     }
+                 ],
+    "item":  [
+                 {
+                     "name":  "SEC-INJ-01 - Login Input Validation",
+                     "request":  {
+                                     "method":  "POST",
+                                     "header":  [
+                                                    {
+                                                        "key":  "Content-Type",
+                                                        "value":  "application/json"
+                                                    }
+                                                ],
+                                     "body":  {
+                                                  "mode":  "raw",
+                                                  "raw":  "{\"email\":{\"$ne\":null},\"password\":{\"$ne\":null}}"
+                                              },
+                                     "url":  "{{baseUrl}}/api/auth/login"
+                                 },
+                     "event":  [
+                                   {
+                                       "listen":  "test",
+                                       "script":  {
+                                                      "type":  "text/javascript",
+                                                      "exec":  [
+                                                                   "pm.test(\u0027Invalid login input rejected\u0027, function () {",
+                                                                   "    pm.response.to.have.status(400);",
+                                                                   "});"
+                                                               ]
+                                                  }
+                                   }
+                               ]
+                 },
+                 {
+                     "name":  "SEC-INJ-02 - Destination Search Validation",
+                     "request":  {
+                                     "method":  "GET",
+                                     "url":  "{{baseUrl}}/api/destinations?search=%28"
+                                 },
+                     "event":  [
+                                   {
+                                       "listen":  "test",
+                                       "script":  {
+                                                      "type":  "text/javascript",
+                                                      "exec":  [
+                                                                   "pm.test(\u0027Special character handled safely\u0027, function () {",
+                                                                   "    pm.response.to.have.status(200);",
+                                                                   "    pm.expect(pm.response.json().success).to.eql(true);",
+                                                                   "});"
+                                                               ]
+                                                  }
+                                   }
+                               ]
+                 },
+                 {
+                     "name":  "SEC-REG-01 - Normal Search Regression",
+                     "request":  {
+                                     "method":  "GET",
+                                     "url":  "{{baseUrl}}/api/destinations?search=Kandy"
+                                 },
+                     "event":  [
+                                   {
+                                       "listen":  "test",
+                                       "script":  {
+                                                      "type":  "text/javascript",
+                                                      "exec":  [
+                                                                   "pm.test(\u0027Normal search works correctly\u0027, function () {",
+                                                                   "    pm.response.to.have.status(200);",
+                                                                   "    pm.expect(pm.response.json().data.some(d =\u003e d.name === \u0027Kandy\u0027)).to.eql(true);",
+                                                                   "});"
+                                                               ]
+                                                  }
+                                   }
+                               ]
+                 },
+                 {
+                     "name":  "SEC-A01-01 - Unauthenticated Admin Access",
+                     "request":  {
+                                     "method":  "GET",
+                                     "auth":  {
+                                                  "type":  "noauth"
+                                              },
+                                     "url":  "{{baseUrl}}/api/admin/stats"
+                                 },
+                     "event":  [
+                                   {
+                                       "listen":  "test",
+                                       "script":  {
+                                                      "type":  "text/javascript",
+                                                      "exec":  [
+                                                                   "pm.test(\u0027Unauthenticated access blocked\u0027, function () {",
+                                                                   "    pm.response.to.have.status(401);",
+                                                                   "});"
+                                                               ]
+                                                  }
+                                   }
+                               ]
+                 },
+                 {
+                     "name":  "SEC-A01-02 - Unauthorized Tourist Access",
+                     "request":  {
+                                     "method":  "GET",
+                                     "auth":  {
+                                                  "type":  "bearer",
+                                                  "bearer":  [
+                                                                 {
+                                                                     "key":  "token",
+                                                                     "value":  "{{touristToken}}",
+                                                                     "type":  "string"
+                                                                 }
+                                                             ]
+                                              },
+                                     "url":  "{{baseUrl}}/api/admin/stats"
+                                 },
+                     "event":  [
+                                   {
+                                       "listen":  "test",
+                                       "script":  {
+                                                      "type":  "text/javascript",
+                                                      "exec":  [
+                                                                   "pm.test(\u0027Unauthorized tourist access blocked\u0027, function () {",
+                                                                   "    pm.response.to.have.status(403);",
+                                                                   "});"
+                                                               ]
+                                                  }
+                                   }
+                               ]
+                 },
+                 {
+                     "name":  "SEC-A01-03 - Authorized Admin Access",
+                     "request":  {
+                                     "method":  "GET",
+                                     "auth":  {
+                                                  "type":  "bearer",
+                                                  "bearer":  [
+                                                                 {
+                                                                     "key":  "token",
+                                                                     "value":  "{{adminToken}}",
+                                                                     "type":  "string"
+                                                                 }
+                                                             ]
+                                              },
+                                     "url":  "{{baseUrl}}/api/admin/stats"
+                                 },
+                     "event":  [
+                                   {
+                                       "listen":  "test",
+                                       "script":  {
+                                                      "type":  "text/javascript",
+                                                      "exec":  [
+                                                                   "pm.test(\u0027Authorized admin access allowed\u0027, function () {",
+                                                                   "    pm.response.to.have.status(200);",
+                                                                   "});"
+                                                               ]
+                                                  }
+                                   }
+                               ]
+                 }
+             ]
+}

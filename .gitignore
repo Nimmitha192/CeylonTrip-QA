@@ -1,0 +1,11 @@
+
+# Generated files
+.scannerwork/
+jmeter.log
+node_modules/
+coverage/
+
+# Environment secrets
+.env
+.env.*
+!.env.example
